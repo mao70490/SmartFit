@@ -28,6 +28,7 @@ namespace SmartFit.Services
 
         public async Task AddAsync(User user)
         {
+            user.Id = Guid.NewGuid();
             string sql = @"INSERT INTO Users (Id, Name, Age, Height, CurrentWeight, WeightGoal, Email, CreatedAt)
                            VALUES (@Id, @Name, @Age, @Height, @CurrentWeight, @WeightGoal, @Email, @CreatedAt)";
             await _dbConnection.ExecuteAsync(sql, user);
