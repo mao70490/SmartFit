@@ -2,51 +2,63 @@
 using System.Data;
 using Dapper;
 using SmartFit.Interfaces;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace SmartFit.Services
 {
     public class UserService : IUserService
     {
-        private readonly IDbConnection _dbConnection;
+        private readonly IDbConnection _db;
 
-        public UserService(IDbConnection dbConnection)
+        public UserService(IDbConnection db)
         {
-            _dbConnection = dbConnection;
+            _db = db;
         }
 
-        public async Task<User> GetByIdAsync(Guid id)
+        public async Task<bool> RegisterAsync(RegisterRequest request)
         {
-            string sql = "SELECT * FROM Users WHERE Id = @Id";
-            return await _dbConnection.QueryFirstOrDefaultAsync<User>(sql, new { Id = id });
+            var exists = await _db.ExecuteScalarAsync<int>(
+                "SELECT COUNT(1) FROM Users WHERE Email = @Email",
+                new { request.Email }
+            );
+
+            if (exists > 0) throw new Exception("Email 已被註冊");
+
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+            var sql = @"
+            INSERT INTO Users (Id, Name, Email, PasswordHash, Age, Height, CurrentWeight, WeightGoal, CreatedAt)
+            VALUES (@Id, @Name, @Email, @PasswordHash, @Age, @Height, @CurrentWeight, @WeightGoal, GETDATE())";
+
+            var rows = await _db.ExecuteAsync(sql, new
+            {
+                Id = Guid.NewGuid(),
+                request.Name,
+                request.Email,
+                PasswordHash = passwordHash,
+                request.Age,
+                request.Height,
+                request.CurrentWeight,
+                request.WeightGoal
+            });
+
+            return rows > 0;
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync()
+        public async Task<User?> GetByEmailAsync(string email)
         {
-            string sql = "SELECT * FROM Users";
-            return await _dbConnection.QueryAsync<User>(sql);
+            return await _db.QueryFirstOrDefaultAsync<User>(
+                "SELECT * FROM Users WHERE Email = @Email",
+                new { Email = email }
+            );
         }
 
-        public async Task AddAsync(User user)
+        public async Task<User?> GetByIdAsync(Guid id)
         {
-            user.Id = Guid.NewGuid();
-            string sql = @"INSERT INTO Users (Id, Name, Age, Height, CurrentWeight, WeightGoal, Email, CreatedAt)
-                           VALUES (@Id, @Name, @Age, @Height, @CurrentWeight, @WeightGoal, @Email, @CreatedAt)";
-            await _dbConnection.ExecuteAsync(sql, user);
-        }
-
-        public async Task UpdateAsync(User user)
-        {
-            string sql = @"UPDATE Users 
-                           SET Name = @Name, Age = @Age, Height = @Height, 
-                               CurrentWeight = @CurrentWeight, WeightGoal = @WeightGoal, Email = @Email
-                           WHERE Id = @Id";
-            await _dbConnection.ExecuteAsync(sql, user);
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            string sql = "DELETE FROM Users WHERE Id = @Id";
-            await _dbConnection.ExecuteAsync(sql, new { Id = id });
+            return await _db.QueryFirstOrDefaultAsync<User>(
+                "SELECT * FROM Users WHERE Id = @Id",
+                new { Id = id }
+            );
         }
     }
 }
