@@ -5,7 +5,7 @@ namespace SmartFit.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateToken(User user);
+        string GenerateToken(UserRegister user);
         ClaimsPrincipal? ValidateToken(string token);
     }
 }

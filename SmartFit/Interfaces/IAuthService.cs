@@ -4,6 +4,6 @@ namespace SmartFit.Interfaces
 {
     public interface IAuthService
     {
-        Task<User?> AuthenticateAsync(UserLoginRequest request);
+        Task<UserRegister?> AuthenticateAsync(UserLoginRequest request);
     }
 }

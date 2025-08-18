@@ -12,7 +12,7 @@ namespace SmartFit.Services
             _userService = userService;
         }
 
-        public async Task<User?> AuthenticateAsync(UserLoginRequest request)
+        public async Task<UserRegister?> AuthenticateAsync(UserLoginRequest request)
         {
             var user = await _userService.GetByEmailAsync(request.Email);
             if (user == null) return null;

@@ -1,6 +1,6 @@
 ﻿namespace SmartFit.Model
 {
-    public class User
+    public class UserRegister
     {
         public Guid Id { get; set; }             // 使用者唯一識別碼
         public string Name { get; set; }         // 使用者名稱

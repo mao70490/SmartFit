@@ -5,8 +5,8 @@ namespace SmartFit.Interfaces
 {
     public interface IUserService
     {
-        Task<bool> RegisterAsync(RegisterRequest request);
-        Task<User?> GetByEmailAsync(string email);
-        Task<User?> GetByIdAsync(Guid id);
+        Task<bool> RegisterAsync(UserRegister request);
+        Task<UserRegister?> GetByEmailAsync(string email);
+        Task<UserRegister?> GetByIdAsync(Guid id);
     }
 }

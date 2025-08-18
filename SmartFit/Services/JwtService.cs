@@ -18,7 +18,7 @@ namespace SmartFit.Services
             _key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
         }
 
-        public string GenerateToken(User user)
+        public string GenerateToken(UserRegister user)
         {
             var claims = new[]
             {

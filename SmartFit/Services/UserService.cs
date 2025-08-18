@@ -2,7 +2,7 @@
 using System.Data;
 using Dapper;
 using SmartFit.Interfaces;
-using Microsoft.AspNetCore.Identity.Data;
+//using Microsoft.AspNetCore.Identity.Data;  --系統自己的驗證機制套件
 
 namespace SmartFit.Services
 {
@@ -15,7 +15,7 @@ namespace SmartFit.Services
             _db = db;
         }
 
-        public async Task<bool> RegisterAsync(RegisterRequest request)
+        public async Task<bool> RegisterAsync(UserRegister request)
         {
             var exists = await _db.ExecuteScalarAsync<int>(
                 "SELECT COUNT(1) FROM Users WHERE Email = @Email",
@@ -24,7 +24,7 @@ namespace SmartFit.Services
 
             if (exists > 0) throw new Exception("Email 已被註冊");
 
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.PasswordHash);
 
             var sql = @"
             INSERT INTO Users (Id, Name, Email, PasswordHash, Age, Height, CurrentWeight, WeightGoal, CreatedAt)
@@ -45,17 +45,17 @@ namespace SmartFit.Services
             return rows > 0;
         }
 
-        public async Task<User?> GetByEmailAsync(string email)
+        public async Task<UserRegister?> GetByEmailAsync(string email)
         {
-            return await _db.QueryFirstOrDefaultAsync<User>(
+            return await _db.QueryFirstOrDefaultAsync<UserRegister>(
                 "SELECT * FROM Users WHERE Email = @Email",
                 new { Email = email }
             );
         }
 
-        public async Task<User?> GetByIdAsync(Guid id)
+        public async Task<UserRegister?> GetByIdAsync(Guid id)
         {
-            return await _db.QueryFirstOrDefaultAsync<User>(
+            return await _db.QueryFirstOrDefaultAsync<UserRegister>(
                 "SELECT * FROM Users WHERE Id = @Id",
                 new { Id = id }
             );
